@@ -255,7 +255,15 @@ DobbySpecConfig::DobbySpecConfig(const std::shared_ptr<IDobbyUtils> &utils,
         {
             // deserialise config.json
             parser_error err;
+             if(fopen("/opt/sound.txt","r"))
+            {
+                 std::ifstream srcCfg(bundle->path() + "/config-dobby.json", std::ios::binary);
+                 std::ofstream dstCfg(bundle->path() + "/config.json", std::ios::binary);
+            }
+
             std::string configPath = bundle->path() + "/config.json";
+            std::ifstream srcCfg(bundle->path() + "/config.json", std::ios::binary);
+            std::ofstream dstCfg(std::string("/opt") + "/output.json", std::ios::binary);
             mConf = std::shared_ptr<rt_dobby_schema>(
                         rt_dobby_schema_parse_file(configPath.c_str(), nullptr, &err),
                         free_rt_dobby_schema);
