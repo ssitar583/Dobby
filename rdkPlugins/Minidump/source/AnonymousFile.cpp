@@ -133,8 +133,6 @@ bool AnonymousFile::copyContentTo(const std::string& destFile)
     if (!fileSize)
     {
         AI_LOG_DEBUG("Empty file for fd %d", mFd);
-        fclose(fp);
-        fp = nullptr;
         AI_LOG_FN_EXIT();
         return true;
     }
@@ -143,8 +141,6 @@ bool AnonymousFile::copyContentTo(const std::string& destFile)
     if (!buffer)
     {
         AI_LOG_SYS_ERROR_EXIT(errno, "failed to allocate buffer for reading fd %d", mFd);
-        fclose(fp);
-        fp = nullptr;
         return false;
     }
 
@@ -152,7 +148,6 @@ bool AnonymousFile::copyContentTo(const std::string& destFile)
     if (elementsRead != fileSize)
     {
         AI_LOG_ERROR_EXIT("failed to read fd %d correctly", mFd);
-        fp = nullptr;
         free(buffer);
         return false;
     }
