@@ -339,6 +339,24 @@ Netfilter::RuleSet createDropAllRule(const std::string &vethName)
 }
 
 
+Netfilter::RuleSet createSnatRule(const std::string &sourceIP,const std::string &masqueradeIP)
+{
+    std::list<std::string> snatRules;
+    char buf[256];
+
+    std::string snatRule("POSTROUTING "
+                         "-s %s "
+                         "-j SNAT --to-source %s");
+
+    snprintf(buf, sizeof(buf), snatRule.c_str(),
+             sourceIP.c_str(), masqueradeIP.c_str());
+
+    snatRules.emplace_back(buf);
+
+    return Netfilter::RuleSet {{ Netfilter::TableType::Nat, snatRules }};
+}
+
+
 // -----------------------------------------------------------------------------
 /**
  *  @brief Called from host namespace
@@ -872,6 +890,12 @@ bool NetworkSetup::setupVeth(const std::shared_ptr<DobbyRdkPluginUtils> &utils,
         if (!netfilter->addRules(ipv4RuleSet, AF_INET, operation))
         {
             AI_LOG_ERROR_EXIT("failed to add iptables rule to drop veth packets");
+            return false;
+        }
+        Netfilter::RuleSet snat = createSnatRule(helper->ipv4AddrStr(), "127.0.0.1");
+        if(!netfilter->addRules(snat, AF_INET, Netfilter::Operation::Append))
+        {
+            AI_LOG_ERROR_EXIT("failed to add iptables rule to masquerade container ip as localhost ip");
             return false;
         }
     }
