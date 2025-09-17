@@ -344,7 +344,7 @@ Netfilter::RuleSet createSnatRule(const std::string &sourceIP,const std::string 
     std::list<std::string> snatRules;
     char buf[256];
 
-    std::string snatRule("POSTROUTING "
+    std::string snatRule("INPUT "
                          "-s %s "
                          "-j SNAT --to-source %s");
 
