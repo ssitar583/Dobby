@@ -494,6 +494,8 @@ std::vector<Netfilter::RuleSet> constructMasqueradeRules(const std::shared_ptr<N
         {
             const std::string snatRule = createMasqueradeSnatRule(ports[i], containerId, containerAddress, ipVersion);
             natRules.emplace_back(snatRule);
+            const std::string snatInputRule = createMasqueradeSnatInputRule(ports[i], containerId, containerAddress, ipVersion);
+            natRules.emplace_back(snatInputRule);
 
             if (ipVersion == AF_INET)
             {
@@ -1055,7 +1057,57 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
                         "-m comment --comment %s "  // container id
                         "--to %s");                 // container address
 
-  std::string baseRule("INPUT "
+    // create addresses based on IP version
+    if (ipVersion == AF_INET)
+    {
+        sourceAddr = "127.0.0.1";
+        destination = std::string() + ipAddress;
+        bridgeAddr = std::string() + BRIDGE_ADDRESS;
+    }
+    else
+    {
+        sourceAddr = "::1/128";
+        destination = std::string() + ipAddress;
+        bridgeAddr = std::string() + BRIDGE_ADDRESS_IPV6;
+    }
+
+    // populate '%s' fields in base rule
+    snprintf(buf, sizeof(buf), baseRule.c_str(),
+             portForward.protocol.c_str(),
+             sourceAddr.c_str(),
+             bridgeAddr.c_str(),
+             id.c_str(),
+             destination.c_str());
+  
+    return std::string(buf);
+}
+
+
+// -----------------------------------------------------------------------------
+/**
+ *  @brief Constructs an INPUT SNAT rule so that the source address is changed
+ *  to the veth0 inside the container so we get the replies.
+ *
+ *  @param[in]  portForward The protocol and port to forward.
+ *  @param[in]  id          The id of the container making the request.
+ *  @param[in]  ipAddress   The ip address of the container.
+ *  @param[in]  ipVersion   IPv family version (AF_INET/AF_INET6).
+ *
+ *  @return returns the created rule.
+ *
+ */
+std::string createMasqueradeSnatInputRule(const PortForward &portForward,
+                                    const std::string &id,
+                                    const std::string &ipAddress,
+                                    const int ipVersion)
+{
+    char buf[256] = {0};
+
+    std::string bridgeAddr;
+    std::string sourceAddr;
+    std::string destination;
+
+    std::string baseInputRule("INPUT "
                         "-p %s "                    // protocol
                         "-s %s "                    // container localhost
                         "-d %s "                    // bridge address
@@ -1077,8 +1129,8 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
         bridgeAddr = std::string() + BRIDGE_ADDRESS_IPV6;
     }
 
-    // populate '%s' fields in base rule
-    snprintf(buf, sizeof(buf), baseRule.c_str(),
+    // populate '%s' fields in base Input rule
+    snprintf(buf, sizeof(buf), baseInputRule.c_str(),
              portForward.protocol.c_str(),
              sourceAddr.c_str(),
              bridgeAddr.c_str(),
