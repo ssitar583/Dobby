@@ -1055,6 +1055,14 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
                         "-m comment --comment %s "  // container id
                         "--to %s");                 // container address
 
+  std::string baseRule("INPUT "
+                        "-p %s "                    // protocol
+                        "-s %s "                    // container localhost
+                        "-d %s "                    // bridge address
+                        "-j SNAT "
+                        "-m comment --comment %s "  // container id
+                        "--to %s");                 // container address
+
     // create addresses based on IP version
     if (ipVersion == AF_INET)
     {
