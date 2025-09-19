@@ -140,6 +140,11 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
                                     const std::string &ipAddress,
                                     const int ipVersion);
 
+std::string createMasqueradeSnatInputRule(const PortForward &portForward,
+                                    const std::string &id,
+                                    const std::string &ipAddress,
+                                    const int ipVersion);
+
 std::string createLocalLinkSnatRule(const PortForward &portForward,
                                     const std::string &id,
                                     const std::string &ipAddress,
