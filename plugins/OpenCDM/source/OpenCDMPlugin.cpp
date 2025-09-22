@@ -119,7 +119,7 @@ bool OpenCDMPlugin::postConstruction(const ContainerId& id,
                                      const Json::Value& jsonData)
 {
     AI_LOG_FN_ENTRY();
-
+    printf("OpenCDMPlugin::postConstruction\n");
     const unsigned maxBufferNum = 8;
     const unsigned mountFlags = (MS_BIND | MS_NOSUID | MS_NODEV | MS_NOEXEC);
 
@@ -147,19 +147,30 @@ bool OpenCDMPlugin::postConstruction(const ContainerId& id,
     // sanity check the socket exists - if it doesn't then we don't mount
     if (access(ocdmSocketPath.c_str(), F_OK) != 0)
     {
+        printf("Missing OCDM mount\n");
         AI_LOG_ERROR("missing '%s' socket, not mounting in container",
                      ocdmSocketPath.c_str());
     }
     else
     {
-        if (chmod(ocdmSocketPath.c_str(), S_IRWXU | S_IRGRP | S_IWGRP) != 0)
-            AI_LOG_SYS_ERROR(errno, "failed to change access on socket");
-        if (chown(ocdmSocketPath.c_str(), 0, mAppsGroupId) != 0)
+        printf("OCDM Mount found\n");
+        if (chown(ocdmSocketPath.c_str(), 0, 0) != 0)
+        {
+            printf("failed to change owner off socket\n");
             AI_LOG_SYS_ERROR(errno, "failed to change owner off socket");
+        }
+        if (chmod(ocdmSocketPath.c_str(), 0777) != 0)
+        {
+            printf("failed to change access on socket\n");
+            AI_LOG_SYS_ERROR(errno, "failed to change access on socket");
+        }
 
         // mount the socket within the container
         if (!startupState->addMount(ocdmSocketPath, ocdmSocketPath, "bind", mountFlags))
+        {
+            printf("failed to add bind mount for /tmp/ocdm\n");
             AI_LOG_ERROR("failed to add bind mount for '%s'", ocdmSocketPath.c_str());
+        }
     }
 
     // on newer builds we may also need the /tmp/OCDM directory
