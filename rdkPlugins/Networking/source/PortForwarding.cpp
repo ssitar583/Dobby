@@ -1108,23 +1108,22 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     std::string destination;
 
     std::string baseInputRule("INPUT "
-                        "-p %s "                    // protocol
-                        "-s %s "                    // container localhost
-                        "-d %s "                    // bridge address
-                        "-j SNAT "
-                        "-m comment --comment %s "  // container id
-                        "--to %s");                 // container address
+                          "-p %s "   
+                          "-s %s "
+                          "-j SNAT "
+                          "-m comment --comment %s "
+                          "--to-source %s");
 
     // create addresses based on IP version
     if (ipVersion == AF_INET)
     {
-        sourceAddr = "127.0.0.1";
+        loopBackAddr = "127.0.0.1";
         destination = std::string() + ipAddress;
         bridgeAddr = std::string() + BRIDGE_ADDRESS;
     }
     else
     {
-        sourceAddr = "::1/128";
+        loopBackAddr = "::1/128";
         destination = std::string() + ipAddress;
         bridgeAddr = std::string() + BRIDGE_ADDRESS_IPV6;
     }
@@ -1132,10 +1131,9 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     // populate '%s' fields in base Input rule
     snprintf(buf, sizeof(buf), baseInputRule.c_str(),
              portForward.protocol.c_str(),
-             sourceAddr.c_str(),
              bridgeAddr.c_str(),
              id.c_str(),
-             destination.c_str());
+             loopBackAddr.c_str());
 
     return std::string(buf);
 }
