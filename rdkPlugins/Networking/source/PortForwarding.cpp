@@ -1111,7 +1111,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     char buf[256] = {0};
 
     std::string bridgeAddr;
-    std::string sourceAddr;
+    std::string loopBackAddr;
     std::string destination;
 
     std::string baseInputRule("INPUT "
