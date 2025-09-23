@@ -466,6 +466,7 @@ std::vector<Netfilter::RuleSet> constructMasqueradeRules(const std::shared_ptr<N
                                                          const PortForwards &portForwards,
                                                          const int ipVersion)
 {
+    printf("SOUND-DBG-constructMasqueradeRules\n");
     std::string containerAddress;
     if (ipVersion == AF_INET)
     {
@@ -486,16 +487,19 @@ std::vector<Netfilter::RuleSet> constructMasqueradeRules(const std::shared_ptr<N
     // We can only setup masquerading in one direction (container to access host ports)
     if (!portForwards.containerToHost.empty())
     {
+        printf("SOUND-DBG-!portForwards.containerToHost.empty()");
         std::list<std::string> natRules;
         std::list<std::string> filterRules;
         std::vector<struct PortForward> ports = portForwards.containerToHost;
 
         for (size_t i = 0; i < ports.size(); i++)
         {
+            printf("SOUND-DBF-Inside For\n");
             const std::string snatRule = createMasqueradeSnatRule(ports[i], containerId, containerAddress, ipVersion);
             natRules.emplace_back(snatRule);
             const std::string snatInputRule = createMasqueradeSnatInputRule(ports[i], containerId, containerAddress, ipVersion);
             natRules.emplace_back(snatInputRule);
+            printf("SOUND-DBG-Snatrules Added");
 
             if (ipVersion == AF_INET)
             {
@@ -1043,6 +1047,7 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
                                     const std::string &ipAddress,
                                     const int ipVersion)
 {
+    printf("SOUND-DBG-createMasqueradeSnatRule-Entry");
     char buf[256] = {0};
 
     std::string bridgeAddr;
@@ -1078,7 +1083,8 @@ std::string createMasqueradeSnatRule(const PortForward &portForward,
              bridgeAddr.c_str(),
              id.c_str(),
              destination.c_str());
-  
+
+    printf("SOUND-DBG-createMasqueradeSnatRule-Exit-%s\n",buf);
     return std::string(buf);
 }
 
@@ -1101,6 +1107,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
                                     const std::string &ipAddress,
                                     const int ipVersion)
 {
+    printf("SOUND-DBG-createMasqueradeSnatInputRule-Entry");
     char buf[256] = {0};
 
     std::string bridgeAddr;
@@ -1134,7 +1141,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
              bridgeAddr.c_str(),
              id.c_str(),
              loopBackAddr.c_str());
-
+    printf("SOUND-DBG-createMasqueradeSnatInputRule-Exit-%s\n",buf);
     return std::string(buf);
 }
 
