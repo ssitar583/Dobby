@@ -281,10 +281,15 @@ bool PortForwarding::addLocalhostMasquerading(const std::shared_ptr<NetworkingHe
     }
 
     // Apply the iptables rules
-    if (!nsNetfilter->applyRules(AF_INET) || !nsNetfilter->applyRules(AF_INET6))
+    if (!nsNetfilter->applyRules(AF_INET))
     {
-        AI_LOG_ERROR_EXIT("failed to apply iptables rules");
+        AI_LOG_ERROR_EXIT("failed to apply iptables-v4 rules");
         return false;
+    }
+    if(!nsNetfilter->applyRules(AF_INET6))
+    {
+         AI_LOG_ERROR_EXIT("failed to apply iptables-v6 rules");
+         return false;
     }
 
     // Enable route_localnet inside the container
