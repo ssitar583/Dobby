@@ -484,6 +484,7 @@ bool Netfilter::checkDuplicates(RuleSets ruleCache, const int ipVersion) const
 bool Netfilter::applyRules(const int ipVersion)
 {
     AI_LOG_FN_ENTRY();
+    AI_LOG_INFO("Inside ApplyRules");
 
     // we simply need to pipe the fixed iptables rules into iptables-restore
     // without flushing the existing rules
