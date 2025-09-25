@@ -1119,7 +1119,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     std::string loopBackAddr;
     std::string destination;
 
-    std::string baseInputRule("POSTROUTING"
+    std::string baseInputRule("POSTROUTING "
                           "-p %s "   
                           "-s %s "
                           "-j SNAT "
