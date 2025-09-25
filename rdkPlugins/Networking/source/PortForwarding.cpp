@@ -1135,7 +1135,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     }
     else
     {
-        loopBackAddr = "::1/128";
+        loopBackAddr = "::1";
         destination = std::string() + ipAddress;
         bridgeAddr = std::string() + BRIDGE_ADDRESS_IPV6;
     }
