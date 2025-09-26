@@ -401,20 +401,22 @@ void Netfilter::trimDuplicates(RuleSet &existing, RuleSet &newRuleSet, Operation
         while (it != tableRules.end())
         {
             const std::string &rule = *it;
+            AI_LOG_INFO("CHECKING rule candidate: '%s'", rule.c_str());
             if (operation == Operation::Delete && !ruleInList(rule, existingRules))
             {
                 // didn't find rule to delete, remove from ruleset
-                AI_LOG_DEBUG("failed to find rule '%s' to delete", rule.c_str());
+                AI_LOG_INFO("failed to find rule '%s' to delete", rule.c_str());
                 it = tableRules.erase(it);
             }
             else if (ruleInList(rule, existingRules))
             {
                 // found duplicate rule, remove from ruleset
-                AI_LOG_DEBUG("skipping duplicate rule '%s'", rule.c_str());
+                AI_LOG_INFO("skipping duplicate rule '%s'", rule.c_str());
                 it = tableRules.erase(it);
             }
             else
             {
+                AI_LOG_INFO("Rule will be added: '%s'", rule.c_str());
                 ++it;
             }
         }
@@ -650,11 +652,31 @@ bool Netfilter::applyRules(const int ipVersion)
         {
             success = forkExec(IPTABLES_RESTORE_PATH, args,
                                rulesFd, -1, stdErrPipe.writeFd());
+             if (success) 
+             {
+                // Dump the final IPv4 NAT rules
+                std::string rulesDump;
+                if (execCmd("iptables-save", rulesDump) == 0) {
+                    AI_LOG_INFO("Final IPv4 iptables state:\n%s", rulesDump.c_str());
+                } else {
+                    AI_LOG_WARN("Failed to dump IPv4 iptables after restore");
+                }
+             }
         }
         else if (ipVersion == AF_INET6)
         {
             success = forkExec(IP6TABLES_RESTORE_PATH, args,
                                rulesFd, -1, stdErrPipe.writeFd());
+            if (success) 
+            {
+                // Dump the final IPv6 NAT rules
+                std::string rulesDump6;
+                if (execCmd("ip6tables-save", rulesDump6) == 0) {
+                    AI_LOG_INFO("Final IPv6 ip6tables state:\n%s", rulesDump6.c_str());
+                } else {
+                    AI_LOG_WARN("Failed to dump IPv6 ip6tables after restore");
+                }
+            }
         }
         else
         {
