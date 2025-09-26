@@ -654,13 +654,21 @@ bool Netfilter::applyRules(const int ipVersion)
                                rulesFd, -1, stdErrPipe.writeFd());
              if (success) 
              {
-                // Dump the final IPv4 NAT rules
-                std::string rulesDump;
-                if (execCmd("iptables-save", rulesDump) == 0) {
-                    AI_LOG_INFO("Final IPv4 iptables state:\n%s", rulesDump.c_str());
-                } else {
-                    AI_LOG_WARN("Failed to dump IPv4 iptables after restore");
-                }
+                    FILE* pipe = popen(IPTABLES_SAVE_PATH, "r");
+                    if (!pipe) {
+                        AI_LOG_ERROR("Failed to open iptables-save pipe");
+                        return;
+                    }
+                    
+                    char buffer[256];
+                    std::string output;
+                    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                        output += buffer;
+                    }
+                    
+                    pclose(pipe);
+                    
+                    AI_LOG_INFO("Current iptables rules:\n%s", output.c_str());
              }
         }
         else if (ipVersion == AF_INET6)
@@ -669,13 +677,21 @@ bool Netfilter::applyRules(const int ipVersion)
                                rulesFd, -1, stdErrPipe.writeFd());
             if (success) 
             {
-                // Dump the final IPv6 NAT rules
-                std::string rulesDump6;
-                if (execCmd("ip6tables-save", rulesDump6) == 0) {
-                    AI_LOG_INFO("Final IPv6 ip6tables state:\n%s", rulesDump6.c_str());
-                } else {
-                    AI_LOG_WARN("Failed to dump IPv6 ip6tables after restore");
-                }
+                  FILE* pipe = popen(IP6TABLES_SAVE_PATH, "r");
+                    if (!pipe) {
+                        AI_LOG_ERROR("Failed to open ip6tables-save pipe");
+                        return;
+                    }
+                    
+                    char buffer[256];
+                    std::string output;
+                    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+                        output += buffer;
+                    }
+                    
+                    pclose(pipe);
+                    
+                    AI_LOG_INFO("Current iptables rules:\n%s", output.c_str());
             }
         }
         else
