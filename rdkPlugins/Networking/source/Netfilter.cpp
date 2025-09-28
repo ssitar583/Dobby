@@ -657,7 +657,7 @@ bool Netfilter::applyRules(const int ipVersion)
                     FILE* pipe = popen(IPTABLES_SAVE_PATH, "r");
                     if (!pipe) {
                         AI_LOG_ERROR("Failed to open iptables-save pipe");
-                        return;
+                        return false;
                     }
                     
                     char buffer[256];
@@ -680,7 +680,7 @@ bool Netfilter::applyRules(const int ipVersion)
                   FILE* pipe = popen(IP6TABLES_SAVE_PATH, "r");
                     if (!pipe) {
                         AI_LOG_ERROR("Failed to open ip6tables-save pipe");
-                        return;
+                        return false;
                     }
                     
                     char buffer[256];
