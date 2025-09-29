@@ -24,6 +24,17 @@
 #include <fcntl.h>
 
 
+void printRules(const std::vector<Netfilter::RuleSet>& ruleSets) {
+    for (const auto& table : ruleSets) {
+        std::string tableName = (table.tableType == Netfilter::TableType::Nat) ? "nat" : "filter";
+        std::cout << "Table: " << tableName << "\n";
+        for (const auto& rule : table.rules) {
+            std::cout << "  " << rule << "\n";
+        }
+        std::cout << std::endl;
+    }
+}
+
 // -----------------------------------------------------------------------------
 /**
  *  @brief Adds the two iptables firewall rules to enable port forwarding.
@@ -528,6 +539,7 @@ std::vector<Netfilter::RuleSet> constructMasqueradeRules(const std::shared_ptr<N
             { Netfilter::TableType::Nat, natRules },
             { Netfilter::TableType::Filter, filterRules }
         };
+        printRules(rules);
         ruleSets.emplace(ruleSets.begin(), rules);
     }
 
