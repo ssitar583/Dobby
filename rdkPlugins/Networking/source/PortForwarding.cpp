@@ -1117,7 +1117,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
 
     std::string bridgeAddr;
     std::string loopBackAddr;
-    std::string destination;
+    std::string sourceAddr;
 
     std::string baseInputRule("POSTROUTING "
                           "-p %s "   
@@ -1130,20 +1130,20 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     if (ipVersion == AF_INET)
     {
         loopBackAddr = "127.0.0.1";
-        destination = std::string() + ipAddress;
+        sourceAddr = std::string() + ipAddress;
         bridgeAddr = std::string() + BRIDGE_ADDRESS;
     }
     else
     {
         loopBackAddr = "::1";
-        destination = std::string() + ipAddress;
+        sourceAddr = std::string() + ipAddress;
         bridgeAddr = std::string() + BRIDGE_ADDRESS_IPV6;
     }
 
     // populate '%s' fields in base Input rule
     snprintf(buf, sizeof(buf), baseInputRule.c_str(),
              portForward.protocol.c_str(),
-             bridgeAddr.c_str(),
+             sourceAddr.c_str(),
              id.c_str(),
              loopBackAddr.c_str());
     AI_LOG_INFO("SOUND-DBG-createMasqueradeSnatInputRule-Exit-%s\n",buf);
