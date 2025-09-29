@@ -527,6 +527,7 @@ bool Netfilter::applyRules(const int ipVersion)
     // iterate through all tables
     for (TableType tableType : tableTypes)
     {
+        AI_LOG_INFO("Processing table %d, checking rules...", static_cast<int>(tableType));
         // check if there are any rules to be applied for this table
         RuleSet::iterator tableUnchanged = ruleCache.unchangedRuleSet.find(tableType);
         RuleSet::iterator tableAppend = ruleCache.appendRuleSet.find(tableType);
@@ -608,6 +609,7 @@ bool Netfilter::applyRules(const int ipVersion)
             success = false;
             break;
         }
+        AI_LOG_INFO("Generated rules for table %d:\n%s", static_cast<int>(tableType), rulesStream.str().c_str());
     }
 
     // exec the iptables-restore function, passing in the pipe for stdin
@@ -647,7 +649,7 @@ bool Netfilter::applyRules(const int ipVersion)
         {
             AI_LOG_SYS_ERROR(errno, "failed to seek to the beginning of the memfd");
         }
-
+        AI_LOG_INFO("Flushed rules to memfd, about to call iptables-restore (ipVersion=%d)", ipVersion);
         if (ipVersion == AF_INET)
         {
             success = forkExec(IPTABLES_RESTORE_PATH, args,
