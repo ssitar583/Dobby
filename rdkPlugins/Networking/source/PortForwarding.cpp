@@ -750,6 +750,7 @@ bool constructContainerToHostRules(std::vector<Netfilter::RuleSet> &ruleSets,
                                    const std::vector<struct PortForward> &ports,
                                    const int ipVersion)
 {
+    AI_LOG_INFO("SOUND-DBG-Inside constructContainerToHostRules");
     std::list<std::string> natRules;
     std::list<std::string> filterRules;
 
@@ -760,6 +761,10 @@ bool constructContainerToHostRules(std::vector<Netfilter::RuleSet> &ruleSets,
         const std::string dnatRule =
             createDnatRule(ports[i], containerId, containerAddress, ipVersion);
         natRules.emplace_back(dnatRule);
+
+        const std::string snatRule =
+            createMasqueradeSnatInputRule(ports[i], containerId, containerAddress, ipVersion);
+        natRules.emplace_back(snatRule);
 
         // construct accept rule to insert to iptables
         const std::string acceptRule =
