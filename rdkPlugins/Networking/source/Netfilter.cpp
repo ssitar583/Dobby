@@ -609,7 +609,7 @@ bool Netfilter::applyRules(const int ipVersion)
             success = false;
             break;
         }
-        AI_LOG_INFO("Generated rules for table %d:\n%s", static_cast<int>(tableType), rulesStream.str().c_str());
+        //AI_LOG_INFO("Generated rules for table %d:\n%s", static_cast<int>(tableType), rulesStream.str().c_str());
     }
 
     // exec the iptables-restore function, passing in the pipe for stdin
