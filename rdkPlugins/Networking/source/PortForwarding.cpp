@@ -22,17 +22,39 @@
 #include <algorithm>
 #include <Logging.h>
 #include <fcntl.h>
+#include <iostream>
 
 
 void printRules(const std::vector<Netfilter::RuleSet>& ruleSets) {
-    for (const auto& table : ruleSets) {
-        std::string tableName = (table.tableType == Netfilter::TableType::Nat) ? "nat" : "filter";
-        std::cout << "Table: " << tableName << "\n";
-        for (const auto& rule : table.rules) {
-            std::cout << "  " << rule << "\n";
+    AI_LOG_INFO("SOUND-DBG-printRules");
+    for (const auto& [tableType, rules] : ruleSet)
+    {
+        std::string tableName;
+        switch (tableType)
+        {
+            case Netfilter::TableType::Raw:      tableName = "raw"; break;
+            case Netfilter::TableType::Nat:      tableName = "nat"; break;
+            case Netfilter::TableType::Mangle:   tableName = "mangle"; break;
+            case Netfilter::TableType::Filter:   tableName = "filter"; break;
+            case Netfilter::TableType::Security: tableName = "security"; break;
+            default:                             tableName = "invalid"; break;
         }
-        std::cout << std::endl;
+    
+        AI_LOG_INFO("=== Rules in table: %s ===", tableName.c_str());
+    
+        if (rules.empty())
+        {
+            AI_LOG_INFO("  (no rules)");
+            continue;
+        }
+    
+        for (const auto& rule : rules)
+        {
+            AI_LOG_INFO("  %s", rule.c_str());
+        }
     }
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -539,8 +561,9 @@ std::vector<Netfilter::RuleSet> constructMasqueradeRules(const std::shared_ptr<N
             { Netfilter::TableType::Nat, natRules },
             { Netfilter::TableType::Filter, filterRules }
         };
-        printRules(rules);
+        
         ruleSets.emplace(ruleSets.begin(), rules);
+        printRules(ruleSets);
     }
 
     return ruleSets;
