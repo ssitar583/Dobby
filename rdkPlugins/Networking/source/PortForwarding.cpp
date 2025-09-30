@@ -778,9 +778,9 @@ bool constructContainerToHostRules(std::vector<Netfilter::RuleSet> &ruleSets,
             createDnatRule(ports[i], containerId, containerAddress, ipVersion);
         natRules.emplace_back(dnatRule);
 
-        const std::string snatRule =
-            createMasqueradeSnatInputRule(ports[i], containerId, containerAddress, ipVersion);
-        natRules.emplace_back(snatRule);
+        // const std::string snatRule =
+        //     createMasqueradeSnatInputRule(ports[i], containerId, containerAddress, ipVersion);
+        // natRules.emplace_back(snatRule);
 
         // construct accept rule to insert to iptables
         const std::string acceptRule =
