@@ -27,11 +27,13 @@
 
 void printRules(const std::vector<Netfilter::RuleSet>& ruleSets) {
     AI_LOG_INFO("SOUND-DBG-printRules");
-    for (const auto& [tableType, rules] : ruleSets)
-    {
+   for (const auto& ruleSet : ruleSets) {       // ruleSet is a std::map<TableType, list<string>>
+    for (const auto& pair : ruleSet) {      // pair is std::pair<const TableType, std::list<std::string>>
+        Netfilter::TableType tableType = pair.first;
+        const std::list<std::string>& rules = pair.second;
+
         std::string tableName;
-        switch (tableType)
-        {
+        switch (tableType) {
             case Netfilter::TableType::Raw:      tableName = "raw"; break;
             case Netfilter::TableType::Nat:      tableName = "nat"; break;
             case Netfilter::TableType::Mangle:   tableName = "mangle"; break;
@@ -39,22 +41,13 @@ void printRules(const std::vector<Netfilter::RuleSet>& ruleSets) {
             case Netfilter::TableType::Security: tableName = "security"; break;
             default:                             tableName = "invalid"; break;
         }
-    
-        AI_LOG_INFO("=== Rules in table: %s ===", tableName.c_str());
-    
-        if (rules.empty())
-        {
-            AI_LOG_INFO("  (no rules)");
-            continue;
-        }
-    
-        for (const auto& rule : rules)
-        {
+
+        AI_LOG_INFO("Table: %s", tableName.c_str());
+        for (const auto& rule : rules) {
             AI_LOG_INFO("  %s", rule.c_str());
         }
     }
-
-
+}
 }
 
 // -----------------------------------------------------------------------------
