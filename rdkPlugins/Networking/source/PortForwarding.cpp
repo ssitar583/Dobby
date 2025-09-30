@@ -27,7 +27,7 @@
 
 void printRules(const std::vector<Netfilter::RuleSet>& ruleSets) {
     AI_LOG_INFO("SOUND-DBG-printRules");
-    for (const auto& [tableType, rules] : ruleSet)
+    for (const auto& [tableType, rules] : ruleSets)
     {
         std::string tableName;
         switch (tableType)
