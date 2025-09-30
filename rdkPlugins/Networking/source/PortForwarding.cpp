@@ -1155,6 +1155,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     std::string baseInputRule("POSTROUTING "
                           "-p %s "   
                           "-s %s "
+                          "--dport %s "
                           "-j SNAT "
                           "-m comment --comment %s "
                           "--to-source %s");
@@ -1177,6 +1178,7 @@ std::string createMasqueradeSnatInputRule(const PortForward &portForward,
     snprintf(buf, sizeof(buf), baseInputRule.c_str(),
              portForward.protocol.c_str(),
              sourceAddr.c_str(),
+             portForward.port.c_str(),
              id.c_str(),
              loopBackAddr.c_str());
     AI_LOG_INFO("SOUND-DBG-createMasqueradeSnatInputRule-Exit-%s\n",buf);
