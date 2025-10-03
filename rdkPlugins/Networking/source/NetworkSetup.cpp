@@ -205,9 +205,9 @@ std::vector<Netfilter::RuleSet> constructBridgeRules(const std::shared_ptr<Netfi
         Netfilter::RuleSet::iterator appendNatRules = appendRuleSet.find(Netfilter::TableType::Nat);
         appendNatRules->second.emplace_front("POSTROUTING -s %y -d 255.255.255.255/32 ! -o " BRIDGE_NAME " -j RETURN");
         appendNatRules->second.emplace_front("POSTROUTING -s %y -d 224.0.0.0/24 ! -o " BRIDGE_NAME " -j RETURN");
-        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -d 100.64.11.1 -p tcp --dport 8016 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
-        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -d 100.64.11.1 -p tcp --dport 8017 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
-        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -d 100.64.11.1 -p tcp --dport 8443 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
+        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -p tcp --dport 8016 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
+        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -p tcp --dport 8017 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
+        appendNatRules->second.emplace_back("POSTROUTING -s 100.64.11.0/24 -p tcp --dport 8443 -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns");
 
         // reject with "icmp-port-unreachable" if not ACCEPTed by now
         Netfilter::RuleSet::iterator appendFilterRules = appendRuleSet.find(Netfilter::TableType::Filter);
