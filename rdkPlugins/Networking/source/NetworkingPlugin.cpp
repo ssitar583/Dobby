@@ -211,6 +211,56 @@ bool NetworkingPlugin::createRuntime()
         // Add localhost masquerade if enabled (run in container network namespace)
         if (mPluginData->port_forwarding->localhost_masquerade_present && mPluginData->port_forwarding->localhost_masquerade)
         {
+              AI_LOG_INFO("Localhost masquerade enabled — setting up container-to-host NAT rules");
+
+              rt_defs_plugins_networking_data_port_forwarding *portsConfig = mPluginData->port_forwarding;
+          
+              // Get container IP from helper
+              std::string containerIp = mHelper->ipv4AddrStr();
+          
+              // Ensure Netfilter instance exists
+              if (!mNetfilter)
+              {
+                  AI_LOG_ERROR("mNetfilter is null, cannot add NAT rules");
+                  return;
+              }
+          
+              char ruleBuf[256];  // buffer to store rule string
+          
+              for (size_t i = 0; i < portsConfig->container_to_host_len; i++)
+              {
+                  const auto *entry = portsConfig->container_to_host[i];
+          
+                  // Validate protocol
+                  const char *protocol = nullptr;
+                  if (strcasecmp(entry->protocol, "tcp") == 0)
+                      protocol = "tcp";
+                  else if (strcasecmp(entry->protocol, "udp") == 0)
+                      protocol = "udp";
+                  else
+                  {
+                      AI_LOG_WARN("Invalid protocol '%s' in container_to_host[%zu]", entry->protocol, i);
+                      continue;
+                  }
+          
+                  // Build rule using snprintf
+                  snprintf(ruleBuf, sizeof(ruleBuf),
+                           "INPUT -s %s -p %s --dport %u -j SNAT --to-source 127.0.0.1 -m comment --comment container-to-host-hostns",
+                           containerIp.c_str(),
+                           protocol,
+                           entry->port);
+          
+                  // Add the rule to NAT table in host namespace
+                  if (mNetfilter->addRule(Netfilter::TableType::Nat, ruleBuf))
+                  {
+                      AI_LOG_INFO("Added host NAT rule: %s", ruleBuf);
+                  }
+                  else
+                  {
+                      AI_LOG_ERROR("Failed to add NAT rule: %s", ruleBuf);
+                  }
+            }
+            
             // Ideally this would be done in the createContainer hook, but that fails
             // on some platforms with permissions issues (works fine on VM...)
             if (!mUtils->callInNamespace(mUtils->getContainerPid(), CLONE_NEWNET,
