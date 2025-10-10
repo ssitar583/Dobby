@@ -260,7 +260,7 @@ bool NetworkingPlugin::createRuntime()
               ruleSet[Netfilter::TableType::Nat] = natRules;
               
               // Apply rules using addRules
-              if (mNetfilter->addRules(ruleSet, AF_INET, Netfilter::Operation::Add))
+              if (mNetfilter->addRules(ruleSet, AF_INET, Netfilter::Operation::Append))
               {
                   AI_LOG_INFO("Container-to-host NAT rules added successfully");
               }
