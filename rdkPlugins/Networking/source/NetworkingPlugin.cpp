@@ -222,7 +222,7 @@ bool NetworkingPlugin::createRuntime()
               if (!mNetfilter)
               {
                   AI_LOG_ERROR("mNetfilter is null, cannot add NAT rules");
-                  return;
+                  return false;
               }
           
               char ruleBuf[256];  // buffer to store rule string
@@ -251,7 +251,7 @@ bool NetworkingPlugin::createRuntime()
                            entry->port);
           
                   // Add the rule to NAT table in host namespace
-                  if (mNetfilter->addRule(Netfilter::TableType::Nat, ruleBuf))
+                  if (mNetfilter->addRules(Netfilter::TableType::Nat, ruleBuf))
                   {
                       AI_LOG_INFO("Added host NAT rule: %s", ruleBuf);
                   }
