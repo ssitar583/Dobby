@@ -29,12 +29,6 @@ add_library(${PROJECT_NAME}
         ../Networking/source/StdStreamPipe.cpp
         )
 
-if(securityagent_FOUND)
-        add_definitions("-DHAS_SECURITY_AGENT")
-else()
-        message("Could not find ThunderClientLibraries SecurityAgent - building without token support")
-endif()
-
 if (EXTERNAL_THUNDER_PLUGIN_BUILD)
         # TODO:: Improve this. All plugins should be able to be built standalone
         # This allows the Thunder plugin to be built in a standalone recipe to break
