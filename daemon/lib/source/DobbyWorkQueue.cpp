@@ -130,14 +130,33 @@ bool DobbyWorkQueue::runUntil(const std::chrono::steady_clock::time_point &deadl
             WorkItem work = std::move(mWorkQueue.front());
             mWorkQueue.pop();
 
+            AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread B processing work item tag=%llu, "
+                       "counter=%llu, queue_size=%zu", 
+                       work.tag, mWorkCompleteCounter, mWorkQueue.size());
+            
             locker.unlock();
+
+            AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread B ENTERING work.func() for tag=%llu", 
+                       work.tag);
+
+            AI_LOG_INFO("SOUND-DBG: DEBUG: Adding 500ms delay before work execution");
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
             if (work.func)
                 work.func();
 
+            AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread B COMPLETED work.func() for tag=%llu", work.tag);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
             // signal completion of work item
             mWorkCompleteLock.lock();
+
+            AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread B updating counter %llu -> %llu", mWorkCompleteCounter, work.tag);
+            
             mWorkCompleteCounter = work.tag;
+
+            AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread B counter updated to %llu, signaling waiters", mWorkCompleteCounter);
+            
             mWorkCompleteLock.unlock();
             mWorkCompleteCond.notify_all();
 
@@ -207,6 +226,9 @@ bool DobbyWorkQueue::doWork(WorkFunc &&work)
 
     // add to the queue
     const uint64_t tag = ++mWorkCounter;
+
+    AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread A queuing work tag=%llu, current_counter=%llu", tag, mWorkCompleteCounter);
+    
     mWorkQueue.emplace(tag, std::move(work));
 
     queueLocker.unlock();
@@ -217,17 +239,24 @@ bool DobbyWorkQueue::doWork(WorkFunc &&work)
 
     // then wait for the function to be executed
     std::unique_lock<AICommon::Mutex> completeLocker(mWorkCompleteLock);
+    AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread A waiting for tag=%llu, current_counter=%llu", 
+               tag, mWorkCompleteCounter);
+    int timeout_count = 0;
     while (mWorkCompleteCounter < tag)
     {
         // wait with a timeout for debugging, we log an error if been waiting
         // for over a second, which would indicate a lock up somewhere
         if (mWorkCompleteCond.wait_for(completeLocker, std::chrono::seconds(1)) == std::cv_status::timeout)
         {
-            AI_LOG_WARN("been waiting for over a second for function to "
-                        "execute, soft lock-up occurred?");
+            timeout_count++;
+            AI_LOG_WARN("SOUND-DBG: WorkQueue: Thread A timeout #%d waiting for tag=%llu, "
+                       "counter=%llu (delta=%lld), soft lock-up?",
+                       timeout_count, tag, mWorkCompleteCounter, 
+                       (long long)(tag - mWorkCompleteCounter));
         }
     }
-
+    AI_LOG_INFO("SOUND-DBG: WorkQueue: Thread A completed waiting for tag=%llu after %d timeouts", 
+               tag, timeout_count);
     return true;
 }
 
