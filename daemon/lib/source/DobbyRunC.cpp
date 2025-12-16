@@ -446,6 +446,8 @@ bool DobbyRunC::killCont(const ContainerId& id, int signal, bool all) const
 
     // block waiting for the forked process to complete
     int status;
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
     if (TEMP_FAILURE_RETRY(waitpid(pid, &status, 0)) < 0)
     {
         AI_LOG_SYS_ERROR_EXIT(errno, "waitpid failed");
