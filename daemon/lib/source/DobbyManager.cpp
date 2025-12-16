@@ -3116,6 +3116,7 @@ void DobbyManager::onChildExit()
 
     AI_LOG_DEBUG("detected child terminated signal");
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     // take the lock as we're being called from the signal monitor thread
     std::lock_guard<std::mutex> locker(mLock);
     std::vector<ContainerStoppedEvent> containerStoppedEvents;
