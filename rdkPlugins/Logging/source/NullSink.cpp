@@ -59,6 +59,11 @@ NullSink::~NullSink()
 
 void NullSink::DumpLog(const int bufferFd)
 {
+
+    AI_LOG_INFO("NullSink-DumpLog hits");
+    
+    usleep(1000);
+    
     memset(mBuf, 0, sizeof(mBuf));
 
     std::lock_guard<std::mutex> locker(mLock);
