@@ -115,6 +115,8 @@ void FileSink::DumpLog(const int bufferFd)
 {
     memset(mBuf, 0, sizeof(mBuf));
 
+    AI_LOG_INFO("SOUND-DBG-Inside DumpLog-Before Acquiring lock");
+
     std::lock_guard<std::mutex> locker(mLock);
 
     ssize_t ret;
@@ -133,6 +135,7 @@ void FileSink::DumpLog(const int bufferFd)
 
         if (offset <= mFileSizeLimit)
         {
+            AI_LOG_INFO("SOUND-DBG-Write Content into mOutputFileFd");
             // Write to the output file
             if (write(mOutputFileFd, mBuf, ret) < 0)
             {
@@ -161,6 +164,7 @@ void FileSink::DumpLog(const int bufferFd)
         write(mOutputFileFd, marker.c_str(), marker.length());
     }
 #endif
+    AI_LOG_INFO("SOUND-DBG-Exit DumpLog");
 }
 
 /**
