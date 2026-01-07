@@ -113,6 +113,9 @@ FileSink::~FileSink()
  */
 void FileSink::DumpLog(const int bufferFd)
 {
+
+    usleep(1000);
+    
     memset(mBuf, 0, sizeof(mBuf));
 
     std::lock_guard<std::mutex> locker(mLock);
