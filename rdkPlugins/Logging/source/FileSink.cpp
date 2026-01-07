@@ -122,7 +122,7 @@ void FileSink::DumpLog(const int bufferFd)
 
     std::lock_guard<std::mutex> locker(mLock);
 
-    std::this_thread::sleep_for(std::chrono::seconds(25));
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 
     ssize_t ret;
     ssize_t offset = 0;
