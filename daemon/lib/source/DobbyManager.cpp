@@ -814,8 +814,10 @@ int32_t DobbyManager::startContainerFromSpec(const ContainerId &id,
                                              const std::vector<std::string>& envVars = std::vector<std::string>())
 {
     AI_LOG_FN_ENTRY();
-
+    AI_LOG_INFO("SOUND-DBG-Inside startContainerFromSpec");
     std::lock_guard<std::mutex> locker(mLock);
+
+    AI_LOG_INFO("SOUND-DBG-Inside startContainerFromSpec-Acquired mLock mutex");
 
     // the first step is to check we don't already have a container with the
     // given id
@@ -974,6 +976,7 @@ int32_t DobbyManager::startContainerFromSpec(const ContainerId &id,
     // hook, in case a hook setup some stuff the post-construction phase above
     onPreDestructionHook(id, container);
 
+    AI_LOG_INFO("SOUND-DBG-Inside startContainerFromSpec-Exit");
     AI_LOG_FN_EXIT();
     return -1;
 }
@@ -3116,8 +3119,13 @@ void DobbyManager::onChildExit()
 
     AI_LOG_DEBUG("detected child terminated signal");
 
+    AI_LOG_INFO("SOUND-DBG-Inside onChildExit-Entry");
+    
     // take the lock as we're being called from the signal monitor thread
     std::lock_guard<std::mutex> locker(mLock);
+
+    AI_LOG_INFO("SOUND-DBG-Inside onChildExit-Acquired mLock");
+    
     std::vector<ContainerStoppedEvent> containerStoppedEvents;
 
     // find the container which has been launched by the given runc (use pid
@@ -3232,6 +3240,7 @@ void DobbyManager::onChildExit()
         }
     }
 
+    AI_LOG_INFO("SOUND-DBG-Inside onChildExit-Exit");
     AI_LOG_FN_EXIT();
 }
 
