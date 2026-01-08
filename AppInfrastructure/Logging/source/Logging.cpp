@@ -43,7 +43,7 @@
 
 
 /* by default print all fatals, errors, warnings & milestones */
-int __ai_debug_log_level = AI_DEBUG_LEVEL_MILESTONE;
+int __ai_debug_log_level = AI_DEBUG_LEVEL_DEBUG;
 
 
 static void _ai_default_diag_printer(int level, const char *file, const char *func,
